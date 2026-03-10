@@ -423,6 +423,51 @@ extern void devsdk_publish_discovery_event (devsdk_service_t *svc, const char * 
  */
 extern void devsdk_publish_system_event (devsdk_service_t *svc, const char *action, iot_data_t * details);
 
+/**
+ * @brief List all available core commands, paginated
+ * @param svc The device service.
+ * @param offset integer to start reading commands
+ * @param limit integer limit of commands to return
+ * @param ncommands The number of commands returned.
+ * @param commands returned commands
+ * @param err Nonzero reason codes will be set here in the event of errors.
+ */
+void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err);
+
+/**
+ * @brief List the available commands for a specified device service
+ * @param svc The device service.
+ * @param devname The requested device name.
+ * @param ncommands The number of commands returned.
+ * @param commands returned commands
+ * @param err Nonzero reason codes will be set here in the event of errors.
+ */
+void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err);
+
+/**
+ * @brief Send a write (put) command to another device
+ * @param svc The device service.
+ * @param devname The device name.
+ * @param resname The resource name.
+ * @param value The values to send.
+ * @param err Nonzero reason codes will be set here in the event of errors.
+ */
+void devsdk_send_command (devsdk_service_t *svc, const char *devname, const char *resname, const iot_data_t *value, devsdk_error *err);
+
+/**
+ * @brief Send a read (get) command to another device
+ * @param svc The device service.
+ * @param devname The device name.
+ * @param cmdname The command to request.
+ * @param pushevent Push the results to the message bus.
+ * @param returnevent Return the results.
+ * @param nreadings pointer to int number of returned results.
+ * @param readings returned results.
+ * @param err Nonzero reason codes will be set here in the event of errors.
+ */
+void devsdk_read_command
+     (devsdk_service_t *svc, const char *devname, const char *cmdname, bool pushevent, bool returnevent, uint32_t **nreadings, const devsdk_commandresult **readings, devsdk_error *err);
+
 #ifdef __cplusplus
 }
 #endif

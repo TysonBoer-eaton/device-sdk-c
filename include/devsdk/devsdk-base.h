@@ -113,6 +113,31 @@ typedef struct devsdk_devices
 } devsdk_devices;
 
 /**
+ * @brief Linked-list structure containing information from core-command
+ */
+
+typedef struct devsdk_corecommand
+{
+  const char *name;
+  bool get;
+  bool set;
+  const char *path;
+  const char *url;
+  iot_data_t *parameters;
+  struct devsdk_corecommand *next;
+} devsdk_corecommand;
+
+typedef struct devsdk_devicecorecommand
+{
+  const char *deviceName;
+  const char *profileName;
+  struct devsdk_corecommand *corecommands;
+  struct devsdk_devicecorecommand *next;
+} devsdk_devicecorecommand;
+
+void devsdk_devicecorecommand_free(devsdk_devicecorecommand *);
+
+/**
  * @brief Finds a protocol's property set in a protocols list.
  * @param prots The protocols to search.
  * @param name The protocol to search for.

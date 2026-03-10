@@ -64,5 +64,6 @@ char *edgex_createdevicereq_write (const edgex_device *dev);
 char *edgex_updateDevOpreq_write (const char *name, edgex_device_operatingstate opstate);
 char *edgex_updateDevLCreq_write (const char *name, uint64_t lastconnected);
 
+char *edgex_command_write (const char *resourcename, const iot_data_t *value);
 
 #endif

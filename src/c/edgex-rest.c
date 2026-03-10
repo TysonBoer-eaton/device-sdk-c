@@ -912,6 +912,21 @@ char *edgex_updateDevLCreq_write (const char *name, uint64_t lastconnected)
   return json;
 }
 
+char *edgex_command_write (const char *resourcename, const iot_data_t *value)
+{
+  char *data;
+  char *json;
+  JSON_Value *val = json_value_init_object ();
+  JSON_Object *obj = json_value_get_object (val);
+
+  data = iot_data_to_json(value);
+  json_object_set_string (obj, resourcename, data);
+  json = json_serialize_to_string (val);
+  json_value_free (val);
+  free (data);
+
+  return json;
+}
 
 edgex_device *edgex_devices_read (iot_logger_t *lc, const char *json)
 {
