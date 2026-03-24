@@ -1,4 +1,5 @@
 find_package (Curses)
+add_subdirectory (commandclient)
 add_subdirectory (counters)
 add_subdirectory (random)
 add_subdirectory (gyro)

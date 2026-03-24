@@ -1,0 +1,17 @@
+{
+  "apiVersion": "v3",
+  "name": "Example-CmdClient",
+  "manufacturer": "IoTechSystems",
+  "model": "IoT2",
+  "description": "Virtual Command Client Device for CSDK Example",
+  "labels": ["virtual"],
+  "deviceResources":
+  [
+    {
+      "name": "RWClient",
+      "description": "An end point for the command client api",
+      "attributes": { "sourceDevice": "Counter1", "sourceResource": "Counter" },
+      "properties": { "valueType": "Uint32", "readWrite": "RW", "units": "things" }
+    }
+  ]
+}

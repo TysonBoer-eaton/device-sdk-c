@@ -14,6 +14,7 @@ build:
 
 test:
 	echo "make test"
+	./scripts/build.sh -tests 
 
 clean:
 	@rm -rf deps build src/c/iot include/iot release

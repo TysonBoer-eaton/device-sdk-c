@@ -1,0 +1,21 @@
+Writable:
+  LogLevel: DEBUG
+
+Service:
+  Host: localhost
+  Port: 59999
+  StartupMsg: Example command client device service start
+
+# uncomment when running from command-line in hybrid mode without Config Provider
+#Clients:
+#  core-metadata:
+#    Host: localhost
+#    Port: 59881
+
+Device:
+  ProfilesDir: ./res/profiles
+  DevicesDir: ./res/devices
+
+MessageBus:
+  Optional:
+    ClientId: device-cmdclient

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "CmdclientTest1",
+    "profileName": "Example-CmdClient",
+    "description": "An Example Command Client Device",
+    "protocols":
+    {
+       "Counter": { "Index": "3" }
+    }
+  }
+]

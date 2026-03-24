@@ -19,10 +19,6 @@ do
       DOCGEN=true
       shift 1
     ;;
-    -tests)
-      TESTS=true
-      shift 1
-    ;;
     *)
       shift 1
     ;;
@@ -62,15 +58,3 @@ mkdir -p $ROOT/build/debug
 cd $ROOT/build/debug
 cmake $CMAKEOPTS -DCMAKE_BUILD_TYPE=Debug $ROOT/src
 make 2>&1 | tee debug.log
-
-if [ "$TESTS" = "true" ]
-then
-  cd $ROOT
-  
-  mkdir -p $ROOT/build/tests
-  cd $ROOT/build/tests
-  #export LDFLAGS="-Wl,--copy-dt-needed-entries"
-  cmake $CMAKEOPTS -DCMAKE_BUILD_TYPE=Debug $ROOT/tests
-  make 2>&1 | tee debug.log
-
-fi

@@ -19,7 +19,7 @@
 
 #define ERR_CHECK(x) if (x.code) { fprintf (stderr, "Error: %d: %s\n", x.code, x.reason); devsdk_service_free (service); free (impl); return x.code; }
 
-typedef enum { COUNTER_R0 } counter_register;
+typedef enum { COUNTER_R0, COUNTER_R1 } counter_register;
 
 typedef struct counter_driver
 {
@@ -86,6 +86,11 @@ static devsdk_resource_attr_t counter_create_resource_attr (void *impl, const io
       result = malloc (sizeof (counter_register));
       *result = COUNTER_R0;
     }
+    else if (strcmp (reg, "count02") == 0)
+    {
+      result = malloc (sizeof (counter_register));
+      *result = COUNTER_R1;
+    }    
     /* else ifs for other registers... */
     else
     {
@@ -126,6 +131,9 @@ static bool counter_get_handler
       case COUNTER_R0:
         readings[i].value = iot_data_alloc_ui32 (atomic_fetch_add (&driver->counters[index], 1));
         break;
+      case COUNTER_R1:
+        readings[i].value = iot_data_alloc_ui32 (atomic_fetch_add (&driver->counters[index+1], 1));
+        break;
     }
   }
   return true;
@@ -151,6 +159,9 @@ static bool counter_put_handler
     {
       case COUNTER_R0:
         atomic_store (&driver->counters[index], iot_data_ui32 (values[i]));
+        break;
+      case COUNTER_R1:
+        atomic_store (&driver->counters[index+1], iot_data_ui32 (values[i]));
         break;
     }
   }
