@@ -432,7 +432,7 @@ extern void devsdk_publish_system_event (devsdk_service_t *svc, const char *acti
  * @param commands returned commands
  * @param err Nonzero reason codes will be set here in the event of errors.
  */
-void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err);
+void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, devsdk_devicecorecommand **commands, devsdk_error *err);
 
 /**
  * @brief List the available commands for a specified device service
@@ -442,7 +442,7 @@ void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t 
  * @param commands returned commands
  * @param err Nonzero reason codes will be set here in the event of errors.
  */
-void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err);
+void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uint32_t *ncommands, devsdk_devicecorecommand **commands, devsdk_error *err);
 
 /**
  * @brief Send a write (put) command to another device
@@ -466,7 +466,7 @@ void devsdk_send_command (devsdk_service_t *svc, const char *devname, const char
  * @param err Nonzero reason codes will be set here in the event of errors.
  */
 void devsdk_read_command
-     (devsdk_service_t *svc, const char *devname, const char *cmdname, bool pushevent, bool returnevent, uint32_t **nreadings, const devsdk_commandresult **readings, devsdk_error *err);
+     (devsdk_service_t *svc, const char *devname, const char *cmdname, bool pushevent, bool returnevent, uint32_t **nreadings, devsdk_commandresult **readings, devsdk_error *err);
 
 #ifdef __cplusplus
 }

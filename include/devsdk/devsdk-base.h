@@ -118,19 +118,19 @@ typedef struct devsdk_devices
 
 typedef struct devsdk_corecommand
 {
-  const char *name;
+  char *name;
   bool get;
   bool set;
-  const char *path;
-  const char *url;
+  char *path;
+  char *url;
   iot_data_t *parameters;
   struct devsdk_corecommand *next;
 } devsdk_corecommand;
 
 typedef struct devsdk_devicecorecommand
 {
-  const char *deviceName;
-  const char *profileName;
+  char *deviceName;
+  char *profileName;
   struct devsdk_corecommand *corecommands;
   struct devsdk_devicecorecommand *next;
 } devsdk_devicecorecommand;

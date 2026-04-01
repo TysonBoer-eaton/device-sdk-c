@@ -23,6 +23,10 @@ void devsdk_devicecorecommand_populate(const iot_data_t *map,uint32_t *nc,devsdk
 
 void devsdk_corecommand_populate(const iot_data_t *map,devsdk_corecommand **cc);
 
+void devsdk_corecommand_free(devsdk_corecommand *c);
+
+void devsdk_devicecorecommand_free(devsdk_devicecorecommand *dcc);
+
 void edgex_command_write_command
 (
   iot_logger_t * lc,
