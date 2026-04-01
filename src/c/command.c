@@ -21,11 +21,10 @@
 
 /** devsdk api functions, defined in devsdk.h **/
 
-void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err)
+void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, devsdk_devicecorecommand **commands, devsdk_error *err)
 {
   *err = EDGEX_OK;
-  devsdk_devicecorecommand *cmds=*commands;
-  iot_data_t *device_commands=NULL;
+
   iot_data_t *response_map=edgex_command_get_all_commands
   (
     svc->logger,
@@ -39,43 +38,38 @@ void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t 
     iot_log_error (svc->logger, "Failed to get commands. Reason: %s",
       err->reason);
       *ncommands=0;
-      memset(cmds,0,sizeof(devsdk_devicecorecommand));
       return;
   }
 
-  device_commands=iot_data_string_map_get_vector(response_map,"deviceCoreCommands");
+  const iot_data_t *device_commands=iot_data_string_map_get_vector(response_map,"deviceCoreCommands");
   if (!device_commands)
   {
     iot_log_error (svc->logger, "Failed to get commands. Can not read 'deviceCoreCommands'");
     *ncommands=0;
-    memset(cmds,0,sizeof(devsdk_devicecorecommand));
     return;
   }
 
   iot_data_vector_iter_t viter;
   iot_data_vector_iter(device_commands,&viter);
-  devsdk_devicecorecommand *newcc=cmds;
-  devsdk_devicecorecommand **ccend=&cmds->next;
   while (iot_data_vector_iter_next(&viter))
   {
-    if (!newcc)
+    devsdk_devicecorecommand_populate(iot_data_vector_iter_value(&viter),ncommands,commands);
+    if (*commands!=NULL)
     {
-      newcc = malloc(sizeof(devsdk_corecommand));
-      memset(cmds,0,sizeof(devsdk_devicecorecommand));
-      *ccend=newcc;
+      commands=&(*commands)->next;
     }
-    devsdk_devicecorecommand_populate(iot_data_vector_iter_value(&viter),ncommands,&newcc);
-    ccend=&newcc->next;
-    newcc=NULL;
+  }
+  if (response_map)
+  {
+    iot_data_free(response_map);
   }
 }
 
-void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uint32_t *ncommands, const devsdk_devicecorecommand **commands, devsdk_error *err)
+void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uint32_t *ncommands, devsdk_devicecorecommand **commands, devsdk_error *err)
 {
   *err = EDGEX_OK;
-  devsdk_devicecorecommand *cmdparse=*commands;
-  iot_data_t *device_commands=NULL;
-  iot_data_t *map=edgex_command_get_device_commands
+  const iot_data_t *device_commands=NULL;
+  iot_data_t *response_map=edgex_command_get_device_commands
   (
     svc->logger,
     &svc->config.endpoints,
@@ -88,19 +82,21 @@ void devsdk_get_commands_by_name(devsdk_service_t *svc, const char *devname, uin
       devname,
       err->reason);
       *ncommands=0;
-      cmdparse=NULL;
+      *commands=NULL;
       return;
   }
 
-  device_commands=iot_data_string_map_get_map(map,"deviceCoreCommand");
+  device_commands=iot_data_string_map_get_map(response_map,"deviceCoreCommand");
   if (!device_commands)
   {
     iot_log_error (svc->logger, "Failed to get commands for device %s. Reason: core-command invalid map",devname);
     *ncommands=0;
-    memset(cmdparse,0,sizeof(devsdk_devicecorecommand));
     return;
   }
-  devsdk_devicecorecommand_populate(device_commands,ncommands,&cmdparse);
+  devsdk_devicecorecommand_populate(device_commands,ncommands,commands);
+  if (response_map){
+    iot_data_free(response_map);
+  }
 }
 
 void devsdk_send_command (devsdk_service_t *svc, const char *devname, const char *resname, const iot_data_t *cmd, devsdk_error *err)
@@ -156,7 +152,7 @@ void devsdk_read_command (
   bool pushevent,
   bool returnevent,
   uint32_t **nreadings,
-  const devsdk_commandresult **readings,
+  devsdk_commandresult **readings,
   devsdk_error *err
 )
 {
@@ -184,29 +180,43 @@ void devsdk_read_command (
       devname,
       cmdname,
       err->reason);
-      *nreadings=0;
-      cmdreadings=NULL;
-      return;
+
+    if (readcommanddata) {
+      free(readcommanddata);
+    }
+    *nreadings=0;
+    cmdreadings=NULL;
+    return;
   }
 
-  iot_data_t *responseEventMap=iot_data_string_map_get_map(readcommanddata,"event");
+  const iot_data_t *responseEventMap=iot_data_string_map_get_map(readcommanddata,"event");
   cmdreadings->origin=iot_data_string_map_get_ui64(responseEventMap,"origin",0u);
-  cmdreadings->value=iot_data_string_map_get_vector(responseEventMap,"readings");
+  cmdreadings->value=iot_data_copy(iot_data_string_map_get_vector(responseEventMap,"readings"));
   *resulttotal=0;
   if (cmdreadings->value!=NULL)
   {
       *resulttotal=iot_data_vector_size(cmdreadings->value);
   }
+  if (readcommanddata) {
+    iot_data_free(readcommanddata);
+  }
 }
 
-void devsdk_devicecorecommand_populate(const iot_data_t *map,uint32_t *nc,devsdk_devicecorecommand **dcc)
+void devsdk_devicecorecommand_populate(const iot_data_t *map,uint32_t *nc, devsdk_devicecorecommand **dcc)
 {
   if (map==NULL) return;
 
+  *dcc=malloc(sizeof(devsdk_devicecorecommand));
+  memset(*dcc,0,sizeof(devsdk_devicecorecommand));
+
   devsdk_devicecorecommand *d=*dcc;
 
-  d->deviceName=iot_data_string_map_get_string(map,"deviceName");
-  d->profileName=iot_data_string_map_get_string(map,"profileName");
+  d->deviceName=malloc(strlen(iot_data_string_map_get_string(map,"deviceName"))+1);
+  strncpy(d->deviceName,iot_data_string_map_get_string(map,"deviceName"),strlen(iot_data_string_map_get_string(map,"deviceName"))+1);
+
+  d->profileName=malloc(strlen(iot_data_string_map_get_string(map,"profileName"))+1);
+  strncpy(d->profileName,iot_data_string_map_get_string(map,"profileName"),strlen(iot_data_string_map_get_string(map,"profileName"))+1);
+
   d->corecommands=NULL;
   d->next=NULL;
 
@@ -216,8 +226,6 @@ void devsdk_devicecorecommand_populate(const iot_data_t *map,uint32_t *nc,devsdk
   devsdk_corecommand **ccend=&d->corecommands;
   while (iot_data_vector_iter_next(&viter))
   {
-    newcc = malloc(sizeof(devsdk_corecommand));
-    memset(newcc,0,sizeof(devsdk_corecommand));
     devsdk_corecommand_populate(iot_data_vector_iter_value(&viter),&newcc);
     *ccend=newcc;
     ccend=&newcc->next;
@@ -229,14 +237,24 @@ void devsdk_corecommand_populate(const iot_data_t *map,devsdk_corecommand **cc)
 {
   if (map==NULL) return;
 
+  *cc=malloc(sizeof(devsdk_corecommand));
+  memset(*cc,0,sizeof(devsdk_corecommand));
+
   devsdk_corecommand *c=*cc;
 
-  c->name=iot_data_string_map_get_string(map,"name");
+  c->name=malloc(strlen(iot_data_string_map_get_string(map,"name"))+1);
+  strncpy(c->name,iot_data_string_map_get_string(map,"name"),strlen(iot_data_string_map_get_string(map,"name"))+1);
+
   c->get=iot_data_string_map_get_bool(map,"get",false);
   c->set=iot_data_string_map_get_bool(map,"set",false);
-  c->path=iot_data_string_map_get_string(map,"path");
-  c->url=iot_data_string_map_get_string(map,"url");
-  c->parameters=iot_data_string_map_get_pointer(map,"parameters");
+
+  c->path=malloc(strlen(iot_data_string_map_get_string(map,"path"))+1);
+  strncpy(c->path,iot_data_string_map_get_string(map,"path"),strlen(iot_data_string_map_get_string(map,"path"))+1);
+
+  c->url=malloc(strlen(iot_data_string_map_get_string(map,"url"))+1);
+  strncpy(c->url,iot_data_string_map_get_string(map,"url"),strlen(iot_data_string_map_get_string(map,"url"))+1);
+
+  c->parameters=iot_data_copy(iot_data_string_map_get_pointer(map,"parameters"));
   c->next=NULL;
 }
 
@@ -247,21 +265,26 @@ void devsdk_corecommand_free(devsdk_corecommand *c)
   free(c->url);
   iot_data_free(c->parameters);
   c->next=NULL;
+  free(c);
 }
 
 void devsdk_devicecorecommand_free(devsdk_devicecorecommand *dcc)
 {
-  if (dcc->next) devsdk_devicecorecommand_free(dcc->next);
+  if (dcc->next)
+  {
+    devsdk_devicecorecommand_free(dcc->next);
+  }
   free(dcc->deviceName);
   free(dcc->profileName);
   devsdk_corecommand *ccs=dcc->corecommands;
   devsdk_corecommand *nextcc=NULL;
-  if (ccs)
+  while (ccs)
   {
     nextcc=ccs->next;
     devsdk_corecommand_free(ccs);
     ccs=nextcc;
   }
+  free(dcc);
 }
 
 /** internal edgex access functions  **/
