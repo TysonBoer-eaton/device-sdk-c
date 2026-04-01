@@ -95,8 +95,8 @@ static bool cmdclient_get_handler
   int limit=0;
   devsdk_error cmderror;
 
-  const devsdk_commandresult *ccreadings=readings;
-  const devsdk_devicecorecommand *devcorecommands=NULL; // malloc(sizeof(devsdk_devicecorecommand));
+  devsdk_commandresult *ccreadings=readings;
+  devsdk_devicecorecommand *devcorecommands=NULL; // malloc(sizeof(devsdk_devicecorecommand));
 
   uint32_t ccnum=0;
   uint32_t *ccnumptr=&ccnum;
@@ -123,7 +123,7 @@ static bool cmdclient_get_handler
         iot_log_debug(driver->lc,"  requesting from core-command device '%s': resource '%s'",srcdev,srcres);
         devsdk_read_command (driver->svc,
           srcdev,srcres,false,true,
-          &ccnum,
+          &ccnumptr,
           &ccreadings,
           &cc_err);
         iot_log_debug(driver->lc,"  core-command returns %d readings",ccnum);
@@ -131,8 +131,9 @@ static bool cmdclient_get_handler
       else if ((srcdev!=NULL)&&(srcres==NULL)) {
         iot_log_debug(driver->lc,"  requesting from core-command device '%s' command list",srcdev);
 
-        devcorecommands=malloc(sizeof(devsdk_devicecorecommand));
-        memset(devcorecommands,0,sizeof(devsdk_devicecorecommand));
+        devcorecommands=NULL;
+        //devcorecommands=malloc(sizeof(devsdk_devicecorecommand));
+        //memset(devcorecommands,0,sizeof(devsdk_devicecorecommand));
 
         devsdk_get_commands_by_name (driver->svc,
           srcdev,
@@ -141,11 +142,17 @@ static bool cmdclient_get_handler
           &cc_err);
         iot_log_debug(driver->lc,"  core-command returns %d commands",ccnum);
 
+        devsdk_devicecorecommand *dcc=devcorecommands;
+        while (dcc)
+        {
+          iot_log_debug(driver->lc,"device name: %s, device profile: %s",dcc->deviceName,dcc->profileName);
+          dcc=dcc->next;
+        }
         devsdk_corecommand *cc=devcorecommands->corecommands;
         int i=0;
         while (cc)
         {
-          iot_log_debug(driver->lc,"    command[%d]: '%s'",i,cc->name);  
+          iot_log_debug(driver->lc,"    command[%d]: '%s'",i,cc->name);
           cc=cc->next;
           ++i;
         }
@@ -158,8 +165,9 @@ static bool cmdclient_get_handler
       else if ((srcdev==NULL)&&(srcres==NULL)) {
         iot_log_debug(driver->lc,"  requesting from core-command all commands offset: %d, limit: %d",offset,limit);
 
-        devcorecommands=malloc(sizeof(devsdk_devicecorecommand));
-        memset(devcorecommands,0,sizeof(devsdk_devicecorecommand));
+        devcorecommands=NULL;
+        //devcorecommands=malloc(sizeof(devsdk_devicecorecommand));
+        //memset(devcorecommands,0,sizeof(devsdk_devicecorecommand));
 
         devsdk_get_commands (driver->svc,
           offset,limit,
@@ -169,6 +177,12 @@ static bool cmdclient_get_handler
         iot_log_debug(driver->lc,"  core-command returns %d commands",ccnum);
         readings=NULL;
 
+        devsdk_devicecorecommand *dcc=devcorecommands;
+        while (dcc)
+        {
+          iot_log_debug(driver->lc,"device name: %s, device profile: %s",dcc->deviceName,dcc->profileName);
+          dcc=dcc->next;
+        }
         devsdk_devicecorecommand_free(devcorecommands);
 
         return false; // until we figure out how to parse
@@ -257,6 +271,76 @@ int main (int argc, char *argv[])
 
   devsdk_service_start (service, NULL, &e);
   ERR_CHECK (e);
+
+  /****************TEST SECTION *******************************/
+
+  //******* get by name
+  uint32_t ccnum=0;
+  uint32_t *ccnumptr=&ccnum;
+  devsdk_error cc_err;
+
+  //const devsdk_devicecorecommand *devcorecommands=malloc(sizeof(devsdk_devicecorecommand));
+  devsdk_devicecorecommand *devcorecommands=NULL;
+  iot_log_debug(impl->lc,"core-command tgt pointer: %X",&devcorecommands);
+  //memset(devcorecommands,0,sizeof(devsdk_devicecorecommand));
+
+  devsdk_get_commands_by_name (service,
+    "Counter2",
+    &ccnum,
+    &devcorecommands,
+    &cc_err);
+  iot_log_debug(impl->lc,"  core-command returns %d commands",ccnum);
+
+  if (cc_err.code==0)
+  {
+    devsdk_devicecorecommand *dcc=devcorecommands;
+    while (dcc)
+    {
+      iot_log_debug(impl->lc,"device name: %s, device profile: %s",dcc->deviceName,dcc->profileName);
+
+      devsdk_corecommand *cc=dcc->corecommands;
+      int i=0;
+      while (cc)
+      {
+        iot_log_debug(impl->lc,"    command[%d]: '%s'",i,cc->name);
+        cc=cc->next;
+        ++i;
+      }
+      dcc=dcc->next;
+    }
+    iot_log_error(impl->lc,"dcc is NULL");
+  }
+  if (devcorecommands) devsdk_devicecorecommand_free(devcorecommands);
+
+  //******* get all
+
+  devcorecommands=NULL;
+
+  devsdk_get_commands (service,
+    1,2,
+    &ccnum,
+    &devcorecommands,
+    &cc_err);
+  iot_log_debug(impl->lc,"  core-command returns %d commands",ccnum);
+
+  devsdk_devicecorecommand *dcc=devcorecommands;
+  while (dcc)
+  {
+      iot_log_debug(impl->lc,"device name: %s, device profile: %s",dcc->deviceName,dcc->profileName);
+
+      devsdk_corecommand *cc=dcc->corecommands;
+      int i=0;
+      while (cc)
+      {
+        iot_log_debug(impl->lc,"    command[%d]: '%s'",i,cc->name);
+        cc=cc->next;
+        ++i;
+      }
+      dcc=dcc->next;
+  }
+   if (devcorecommands) devsdk_devicecorecommand_free(devcorecommands);
+
+  /***********************************************************/
 
   sigemptyset (&set);
   sigaddset (&set, SIGINT);
