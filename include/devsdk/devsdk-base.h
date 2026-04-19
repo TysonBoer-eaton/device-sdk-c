@@ -131,7 +131,6 @@ typedef struct devsdk_devicecorecommand
   char *deviceName;
   char *profileName;
   iot_data_t *corecommands;
-  struct devsdk_devicecorecommand *next;
 } devsdk_devicecorecommand;
 
 void devsdk_devicecorecommand_free(void *);

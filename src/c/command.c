@@ -213,7 +213,6 @@ void devsdk_devicecorecommand_populate(const iot_data_t *map,uint32_t *nc, devsd
   d->deviceName=strdup(iot_data_string_map_get_string(map,"deviceName"));
   d->profileName=strdup(iot_data_string_map_get_string(map,"profileName"));
   d->corecommands=NULL;
-  d->next=NULL;
 
   *nc=0;
   iot_data_vector_iter_t viter;
