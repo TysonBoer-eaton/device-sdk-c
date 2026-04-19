@@ -124,18 +124,17 @@ typedef struct devsdk_corecommand
   char *path;
   char *url;
   iot_data_t *parameters;
-  struct devsdk_corecommand *next;
 } devsdk_corecommand;
 
 typedef struct devsdk_devicecorecommand
 {
   char *deviceName;
   char *profileName;
-  struct devsdk_corecommand *corecommands;
+  iot_data_t *corecommands;
   struct devsdk_devicecorecommand *next;
 } devsdk_devicecorecommand;
 
-void devsdk_devicecorecommand_free(devsdk_devicecorecommand *);
+void devsdk_devicecorecommand_free(void *);
 
 /**
  * @brief Finds a protocol's property set in a protocols list.
