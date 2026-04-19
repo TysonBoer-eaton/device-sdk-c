@@ -429,10 +429,10 @@ extern void devsdk_publish_system_event (devsdk_service_t *svc, const char *acti
  * @param offset integer to start reading commands
  * @param limit integer limit of commands to return
  * @param ncommands The number of commands returned.
- * @param commands returned commands
+ * @param commands returned commands, iot_data_vector containing a vector collection of pointers to devsdk_devicecorecommand
  * @param err Nonzero reason codes will be set here in the event of errors.
  */
-void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, devsdk_devicecorecommand **commands, devsdk_error *err);
+void devsdk_get_commands(devsdk_service_t *svc, int offset, int limit, uint32_t *ncommands, iot_data_t **commands, devsdk_error *err);
 
 /**
  * @brief List the available commands for a specified device service
