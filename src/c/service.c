@@ -763,7 +763,14 @@ static void startConfigured (devsdk_service_t *svc, const devsdk_timeout *deadli
     return;
   }
 
-  *err = EDGEX_OK;
+  /* Wait for core-command to be available */
+
+  if (!ping_client (svc->logger, "core-command", &svc->config.endpoints.command, deadline, err))
+  {
+    return;
+  }
+
+ *err = EDGEX_OK;
 
   /* Register device service in metadata */
 
@@ -1177,7 +1184,7 @@ void devsdk_service_start (devsdk_service_t *svc, iot_data_t *driverdfls, devsdk
 
     if (svc->overwriteconfig)
     {
-      iot_log_info (svc->logger, "--overwrite option is set. Not geting configuration from registry.");
+      iot_log_info (svc->logger, "--overwrite option is set. Not getting configuration from registry.");
       uploadConfig = true;
     }
     else
@@ -1295,6 +1302,16 @@ void devsdk_service_start (devsdk_service_t *svc, iot_data_t *driverdfls, devsdk
       *svc->stopconfig = true;
       return;
     }
+    devsdk_registry_query_service (svc->registry, "core-command", &svc->config.endpoints.command.host, &svc->config.endpoints.command.port, &deadline, err);
+    if (err->code)
+    {
+      iot_data_free (config_file);
+      *svc->stopconfig = true;
+      return;
+    } else
+    {
+      iot_log_debug(svc->logger, "populated core-command client from registry");
+    }
   }
   else if(svc->registry && svc->remote_mode)
   {
@@ -1338,6 +1355,9 @@ void devsdk_service_start (devsdk_service_t *svc, iot_data_t *driverdfls, devsdk
   iot_log_info (svc->logger, "EdgeX device SDK for C, version " CSDK_VERSION_STR);
   iot_log_debug (svc->logger, "Service configuration follows:");
   edgex_device_dumpConfig (svc->logger, configmap);
+  iot_log_debug (svc->logger, "Service configured clients follow:");
+  iot_log_debug (svc->logger, "  metadata: %s:%d",svc->config.endpoints.metadata.host, svc->config.endpoints.metadata.port);
+  iot_log_debug (svc->logger, "   command: %s:%d",svc->config.endpoints.command.host, svc->config.endpoints.command.port);
 
   startConfigured (svc, &deadline, err);
 

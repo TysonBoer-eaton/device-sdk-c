@@ -278,8 +278,10 @@ void edgex_device_parseClients (iot_logger_t *lc, const iot_data_t *clients, edg
   if (clients)
   {
     parseClient (iot_data_string_map_get (clients, "core-metadata"), &endpoints->metadata);
+    parseClient (iot_data_string_map_get (clients, "core-command"), &endpoints->command);
   }
   checkClientOverride (lc, "CORE_METADATA", &endpoints->metadata);
+  checkClientOverride (lc, "CORE_COMMAND", &endpoints->command);
 }
 
 static void addInsecureSecretsMap (iot_data_t *confmap, const iot_data_t *config)
@@ -694,6 +696,7 @@ void edgex_device_freeConfig (devsdk_service_t *svc)
   }
 
   free (svc->config.endpoints.metadata.host);
+  free (svc->config.endpoints.command.host);
 
   iot_data_free (svc->config.sdkconf);
   iot_data_free (svc->config.driverconf);
@@ -769,6 +772,12 @@ static JSON_Value *edgex_device_config_toJson (devsdk_service_t *svc)
   json_object_set_string (mobj, "Host", svc->config.endpoints.metadata.host);
   json_object_set_uint (mobj, "Port", svc->config.endpoints.metadata.port);
   json_object_set_value (cobj, "Metadata", mval);
+
+  JSON_Value *cmdval = json_value_init_object ();
+  JSON_Object *cmdmobj = json_value_get_object (cmdval);
+  json_object_set_string (cmdmobj, "Host", svc->config.endpoints.command.host);
+  json_object_set_uint (cmdmobj, "Port", svc->config.endpoints.command.port);
+  json_object_set_value (cobj, "Command", cmdval);
 
   json_object_set_value (obj, "Clients", cval);
 

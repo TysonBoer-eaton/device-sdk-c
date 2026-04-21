@@ -762,7 +762,7 @@ static edgex_event_cooked *edgex_device_runget3 (devsdk_service_t *svc, edgex_de
   return result;
 }
 
-static int32_t edgex_device_v3impl (devsdk_service_t *svc, edgex_device *dev, const char *cmdname, bool isGet, const iot_data_t *req, const iot_data_t *params, iot_data_t **reply, bool *event_is_cbor)
+extern int32_t edgex_device_v3impl (devsdk_service_t *svc, edgex_device *dev, const char *cmdname, bool isGet, const iot_data_t *req, const iot_data_t *params, iot_data_t **reply, bool *event_is_cbor)
 {
   int32_t result = 0;
   const edgex_cmdinfo *cmd = edgex_deviceprofile_findcommand (svc, cmdname, dev->profile, isGet);
