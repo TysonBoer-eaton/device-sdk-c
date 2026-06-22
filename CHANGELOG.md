@@ -2,6 +2,42 @@
 ## EdgeX Device SDK C
 [Github repository](https://github.com/edgexfoundry/device-sdk-c)
 
+## [4.0.2] - 2026-06-22 
+
+### ✨ Features 
+- Add support for additional command option flags ([#603](https://github.com/edgexfoundry/device-sdk-c/issues/603)) ([#ec1c5eb](https://github.com/edgexfoundry/device-sdk-c/commits/ec1c5eb))
+- Add device resource tags to generated events ([#586](https://github.com/edgexfoundry/device-sdk-c/issues/586)) ([#5bbb84e](https://github.com/edgexfoundry/device-sdk-c/commits/5bbb84e))
+- Add AutoEvent OnChangeThreshold support for numeric readings ([#590](https://github.com/edgexfoundry/device-sdk-c/issues/590)) ([#34e9265](https://github.com/edgexfoundry/device-sdk-c/commits/34e9265))
+- Remove unnecessary threshold validation ([#975898d](https://github.com/edgexfoundry/device-sdk-c/commits/975898d))
+- Add `OnChangeThreshold` support for numeric readings ([#02aa246](https://github.com/edgexfoundry/device-sdk-c/commits/02aa246))
+- Add Core Command client access support for device services ([#604](https://github.com/edgexfoundry/device-sdk-c/issues/604)) ([#3f0e136](https://github.com/edgexfoundry/device-sdk-c/commits/3f0e136))
+- Add CBOR encoding support for all messages ([#72256e2](https://github.com/edgexfoundry/device-sdk-c/commits/72256e2))
+- Add support for reduced event payloads ([#9f170bf](https://github.com/edgexfoundry/device-sdk-c/commits/9f170bf))
+- Automatically upload pre-defined provision watchers ([#4a7f606](https://github.com/edgexfoundry/device-sdk-c/commits/4a7f606))
+
+### 🐛 Bug Fixes 
+- Remove redundant null checks ([#f23a2d7](https://github.com/edgexfoundry/device-sdk-c/commits/f23a2d7))
+- Set the minimum supported SSL version to TLS 1.2. ([#4ebee67](https://github.com/edgexfoundry/device-sdk-c/commits/4ebee67))
+- Update `infoForRes` function to allow device resource attributes to be undefined ([#bc52e77](https://github.com/edgexfoundry/device-sdk-c/commits/bc52e77))
+- Align value transformation order with the Go Device SDK ([#557](https://github.com/edgexfoundry/device-sdk-c/issues/557)) ([#27fedd9](https://github.com/edgexfoundry/device-sdk-c/commits/27fedd9))
+- Add outcome information when a device profile or `AutoEvent` configuration is updated.([#2413ab6](https://github.com/edgexfoundry/device-sdk-c/commits/2413ab6))
+- Properly destroy MQTT clients when connection setup fails.([#d4b7139](https://github.com/edgexfoundry/device-sdk-c/commits/d4b7139))
+- Prevent potential memory issues during MQTT client creation ([#5e1af5e](https://github.com/edgexfoundry/device-sdk-c/commits/5e1af5e))
+- Fix a potential segmentation fault in the Keeper client ([#599](https://github.com/edgexfoundry/device-sdk-c/issues/599)) ([#13a8a15](https://github.com/edgexfoundry/device-sdk-c/commits/13a8a15))
+- Correct the log level used for error messages ([#c458525](https://github.com/edgexfoundry/device-sdk-c/commits/c458525))
+- Removed valid `provisionwatchers` directory check from Edgex_Device_watchers_upload ([#7cf2e44](https://github.com/edgexfoundry/device-sdk-c/commits/7cf2e44))
+- Update the discovery example service to use automatic provision watcher upload ([#55a6d14](https://github.com/edgexfoundry/device-sdk-c/commits/55a6d14))
+- Correct device command topic ordering for the v3 handler ([#8e27311](https://github.com/edgexfoundry/device-sdk-c/commits/8e27311))
+
+### ♻ Code Refactoring
+- Fix `Wmaybe-uninitialized` warning ([#567](https://github.com/edgexfoundry/device-sdk-c/issues/567)) ([#1914c58](https://github.com/edgexfoundry/device-sdk-c/commits/1914c58))
+
+### 👷 Build 
+- Update Dockerfile to Alpine 3.22 as base image to fix CVEs ([#ddd6c99](https://github.com/edgexfoundry/device-sdk-c/commits/ddd6c99))
+
+
+
+
 ## [4.0.0] Odessa - 2025-03-12 (Only compatible with the 4.x releases)
 
 ### ✨  Features
